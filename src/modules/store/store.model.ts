@@ -1,5 +1,6 @@
 import {model, Schema, Document} from "mongoose";
 
+
 export interface StoreDocument extends Document {
   name: string;
   slug: string;
