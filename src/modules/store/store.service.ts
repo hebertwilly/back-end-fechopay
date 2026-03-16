@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Store, StoreDocument } from "./store.model";
 
 export interface CreateStoreDTO {
@@ -7,6 +8,12 @@ export interface CreateStoreDTO {
   whatsappNumber: string;
 }
 
+export interface UpdateStoreDTO {
+  name?: string;
+  email?: string;
+  password?: string;
+  whatsappNumber?: string;
+}
 class StoreService {
   async createStore(data: CreateStoreDTO): Promise<StoreDocument> {
     
@@ -24,6 +31,39 @@ class StoreService {
     });
 
     return store;
+  }
+
+  async updateStore(id: string, data: UpdateStoreDTO): Promise<StoreDocument>{
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error("Formato de ID inválido");
+    }
+
+    if (data.email) {
+      const emailAlreadyExists = await Store.findOne({
+        email: data.email,
+        _id: { $ne: id },
+      });
+
+      if (emailAlreadyExists) {
+        throw new Error("Email já cadastrado");
+      }
+    }
+
+    const storeUpdate = await Store.findByIdAndUpdate(
+      id,
+      data,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!storeUpdate) {
+      throw new Error("Loja não encontrada");
+    }
+
+    return storeUpdate;
   }
 
   private async generateSlug (name: String): Promise<string> {
