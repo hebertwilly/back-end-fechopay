@@ -16,7 +16,7 @@ const storeSchema = new Schema<StoreDocument> ({
     name: {type: String, trim: true, required: true},
     slug: { type: String, unique: true, lowercase: true, required: true},
     email: {type: String, unique: true, lowercase: true, trim: true,  required: true},
-    password: {type: String, required: true},
+    password: {type: String, required: true, select: false},
     whatsappNumber: {type: String, required: true},
     plan: {type: String, default: "free"},
 },

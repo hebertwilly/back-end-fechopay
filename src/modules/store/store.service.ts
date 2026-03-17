@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Store, StoreDocument } from "./store.model";
+import bcrypt from 'bcrypt';
 
 export interface CreateStoreDTO {
   name: string;
@@ -25,11 +26,14 @@ class StoreService {
 
     const slug = await this.generateSlug(data.name);
 
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
     const store = await Store.create({
       ...data,
       slug,
+      password: hashedPassword,
     });
-
+    
     return store;
   }
 
@@ -66,7 +70,7 @@ class StoreService {
     return storeUpdate;
   }
 
-  private async generateSlug (name: String): Promise<string> {
+  private async generateSlug (name: string): Promise<string> {
     const baseSlug = name
       .toLowerCase()
       .trim()

@@ -12,10 +12,12 @@ class StoreController {
       const validatedData = createStoreSchema.parse(req.body);
       
       const store = await storeService.createStore(validatedData);
+      const storeObject = store.toObject();
+      delete storeObject.password;
 
       return res.status(201).json({
         success: true,
-        data: store,
+        data: storeObject,
       });
     } catch (error) {
       next(error);
