@@ -2,7 +2,7 @@ import request from "supertest";
 import { app } from "../../src/app";
 import { Store } from "../../src/modules/store/store.model";
 
-describe("PUT /api/stores/:id", () => {
+describe("PATCH/api/stores/:id", () => {
   it("deve atualizar uma loja com sucesso", async () => {
     const createdStore = await Store.create({
       name: "Loja Original",
@@ -14,7 +14,7 @@ describe("PUT /api/stores/:id", () => {
     });
 
     const response = await request(app)
-      .put(`/api/stores/${createdStore._id}`)
+      .patch(`/api/stores/${createdStore._id}`)
       .send({
         name: "Loja Atualizada",
         whatsappNumber: "11888888888",
@@ -30,7 +30,7 @@ describe("PUT /api/stores/:id", () => {
 
   it("não deve atualizar com id inválido", async () => {
     const response = await request(app)
-      .put("/api/stores/id-invalido")
+      .patch("/api/stores/id-invalido")
       .send({
         name: "Loja Teste",
       });
@@ -43,7 +43,7 @@ describe("PUT /api/stores/:id", () => {
     const fakeId = "507f1f77bcf86cd799439011";
 
     const response = await request(app)
-      .put(`/api/stores/${fakeId}`)
+      .patch(`/api/stores/${fakeId}`)
       .send({
         name: "Loja Inexistente",
       });
@@ -72,7 +72,7 @@ describe("PUT /api/stores/:id", () => {
     });
 
     const response = await request(app)
-      .put(`/api/stores/${firstStore._id}`)
+      .patch(`/api/stores/${firstStore._id}`)
       .send({
         email: "loja2@teste.com",
       });
@@ -80,6 +80,28 @@ describe("PUT /api/stores/:id", () => {
     expect(response.status).toBe(500);
     expect(response.body.message).toBe("Email já cadastrado");
   });
+
+  it("não deve permitir alterar password no update genérico", async () => {
+  const createdStore = await Store.create({
+    name: "Loja Segura",
+    slug: "loja-segura",
+    email: "segura@loja.com",
+    password: "123456",
+    whatsappNumber: "11999999999",
+    plan: "free",
+  });
+
+  const response = await request(app)
+    .patch(`/api/stores/${createdStore._id}`)
+    .send({
+      password: "novaSenha123",
+      name: "Novo Nome",
+    });
+
+  const storeInDb = await Store.findById(createdStore._id).select("+password");
+
+  expect(storeInDb?.password).toBe(createdStore.password);
+});
 
   it("não deve permitir update vazio", async () => {
     const createdStore = await Store.create({
@@ -92,7 +114,7 @@ describe("PUT /api/stores/:id", () => {
     });
 
     const response = await request(app)
-      .put(`/api/stores/${createdStore._id}`)
+      .patch(`/api/stores/${createdStore._id}`)
       .send({});
 
     expect(response.status).toBe(400);
