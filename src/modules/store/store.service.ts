@@ -12,7 +12,6 @@ export interface CreateStoreDTO {
 export interface UpdateStoreDTO {
   name?: string;
   email?: string;
-  password?: string;
   whatsappNumber?: string;
 }
 class StoreService {

@@ -28,11 +28,6 @@ export const updateStoreSchema = z.object({
     .email("Email inválido")
     .optional(),
 
-  password: z
-    .string()
-    .min(6, "Senha deve ter no mínimo 6 caracteres")
-    .optional(),
-
   whatsappNumber: z
     .string()
     .min(10, "WhatsApp inválido")
