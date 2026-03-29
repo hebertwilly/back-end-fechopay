@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { storeService } from "./store.service";
-import { createStoreSchema, updateStoreSchema } from "./store.schema";
+import { createStoreSchema, updateStoreSchema, updatePasswordSchema } from "./store.schema";
 interface Params {
   id: string;
 }
@@ -37,6 +37,23 @@ class StoreController {
         data: store,
       });
     } catch (error) {
+      next(error);
+    }
+  }
+
+  async updatePassword (req: Request<Params>, res: Response, next: NextFunction){
+    try{
+      const validatedData = updatePasswordSchema.parse(req.body);
+
+      const {id} = req.params;
+
+      await storeService.updatePassword(id, validatedData);
+
+      return res.status(200).json({
+        success: true,
+        message: "Senha atualizada com sucesso"
+      });
+    }catch(error){
       next(error);
     }
   }

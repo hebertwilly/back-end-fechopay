@@ -38,5 +38,16 @@ export const updateStoreSchema = z.object({
     "Informe ao menos um campo para atualização"
 );
 
+export const updatePasswordSchema = z.object({
+
+  currentPassword: z.string().min(6, "Senha atual deve ter no minimo 6 caracteres"),
+  newPassword: z.string().min(6, "Nova senha deve ter no mínimo 6 caracteres"),
+
+}).refine((data) => data.currentPassword !== data.newPassword, {
+    message: "A nova senha não pode ser igual à senha atual",
+    path: ["newPassword"],
+});
+
 export type CreateStoreDTO = z.infer<typeof createStoreSchema>;
 export type UpdateStoreDTO = z.infer<typeof updateStoreSchema>;
+export type UpdatePasswordDTO = z.infer<typeof updatePasswordSchema>;

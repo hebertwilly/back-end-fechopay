@@ -69,6 +69,33 @@ class StoreService {
     return storeUpdate;
   }
 
+  async updatePassword(id: string, data: UpdatePasswordDTO): Promise<void>{
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error("Formato de ID inválido");
+    }
+
+    const store = await Store.findById(id).select("+password");
+
+    if(!store){
+      throw new Error("Loja não encontrada");
+    }
+    
+    const confirmPassword = await bcrypt.compare(data.currentPassword, store.password);
+
+    if(!confirmPassword){
+      throw new Error("Senha Atual invalida");
+    }
+
+    const samePassword = await bcrypt.compare(data.newPassword, store.password);
+
+    if (samePassword) {
+      throw new Error("A nova senha não pode ser igual à senha atual");
+    }
+
+    store.password = await bcrypt.hash(data.newPassword, 10);
+    await store.save();
+  }
+
   private async generateSlug (name: string): Promise<string> {
     const baseSlug = name
       .toLowerCase()
