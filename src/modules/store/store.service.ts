@@ -1,19 +1,12 @@
 import mongoose from "mongoose";
 import { Store, StoreDocument } from "./store.model";
 import bcrypt from 'bcrypt';
+import {
+  CreateStoreDTO,
+  UpdateStoreDTO,
+  UpdatePasswordDTO,
+} from "./store.schema";
 
-export interface CreateStoreDTO {
-  name: string;
-  email: string;
-  password: string;
-  whatsappNumber: string;
-}
-
-export interface UpdateStoreDTO {
-  name?: string;
-  email?: string;
-  whatsappNumber?: string;
-}
 class StoreService {
   async createStore(data: CreateStoreDTO): Promise<StoreDocument> {
     
