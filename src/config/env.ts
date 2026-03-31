@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import ms, { type StringValue } from "ms";
 
 const nodeEnv = process.env.NODE_ENV ?? "development";
 
@@ -19,9 +20,14 @@ function requireEnv(name: string): string {
   return value;
 }
 
+const jwtExpiresIn = requireEnv("JWT_EXPIRES_IN") as StringValue;
+const jwtCookieMaxAge = ms(jwtExpiresIn);
+
 export const env = {
   nodeEnv,
   port: Number(process.env.PORT) || 3000,
   mongoUri: requireEnv("MONGO_URI"),
   jwtSecret: requireEnv("JWT_SECRET"),
+  jwtExpiresIn,
+  jwtCookieMaxAge,
 };
