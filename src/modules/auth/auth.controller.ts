@@ -37,6 +37,24 @@ class AuthController {
             next(error);
         }
     }
+
+    async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            res
+            .clearCookie("token", {
+                httpOnly: true,
+                secure: env.nodeEnv === "production",
+                sameSite: "lax",
+                path: "/",
+            })
+            .status(200)
+            .json({
+                message: "Logout realizado com sucesso",
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export const authController = new AuthController();
