@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { logger } from "../config/logger";
+import { AppError } from "../errors/AppError";
 
 export function errorMiddleware(
   error: Error,
@@ -25,8 +26,15 @@ export function errorMiddleware(
     });
   }
 
+  if (error instanceof AppError) {
+    return res.status(error.statusCode).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
   return res.status(500).json({
     success: false,
-    message: error.message || "Erro interno do servidor",
+    message: "Erro interno do servidor",
   });
 }

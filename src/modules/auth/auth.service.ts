@@ -4,19 +4,20 @@ import jwt from "jsonwebtoken";
 import { Store, StoreDocument } from "../store/store.model";
 import { LoginDTO } from "./auth.schema";
 import { env } from "../../config/env";
+import { AppError } from "../../errors/AppError";
 
 class AuthService {
   async login(data: LoginDTO) {
     const store = await Store.findOne({ email: data.email }).select("+password");
 
     if (!store) {
-      throw new Error("Email ou senha inválidos");
+      throw new AppError("Email ou senha inválidos", 401);
     }
 
     const passwordIsValid = await bcrypt.compare(data.password, store.password);
 
     if (!passwordIsValid) {
-      throw new Error("Email ou senha inválidos");
+      throw new AppError("Email ou senha inválidos", 401);
     }
 
     const token = jwt.sign(

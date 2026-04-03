@@ -1,19 +1,15 @@
 import mongoose from "mongoose";
-import { Store, StoreDocument } from "./store.model";
 import bcrypt from 'bcrypt';
-import {
-  CreateStoreDTO,
-  UpdateStoreDTO,
-  UpdatePasswordDTO,
-} from "./store.schema";
-
+import { Store, StoreDocument } from "./store.model";
+import { CreateStoreDTO, UpdateStoreDTO, UpdatePasswordDTO } from "./store.schema";
+import { AppError } from "../../errors/AppError";
 class StoreService {
   async createStore(data: CreateStoreDTO): Promise<StoreDocument> {
     
     const emailExists = await Store.findOne({ email: data.email });
     
     if (emailExists) {
-      throw new Error("Email já cadastrado");
+      throw new AppError("Email já cadastrado", 409);
     }
 
     const slug = await this.generateSlug(data.name);
@@ -32,7 +28,7 @@ class StoreService {
   async updateStore(id: string, data: UpdateStoreDTO): Promise<StoreDocument>{
     
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new Error("Formato de ID inválido");
+      throw new AppError("Formato de ID inválido", 400);
     }
 
     if (data.email) {
@@ -42,7 +38,7 @@ class StoreService {
       });
 
       if (emailAlreadyExists) {
-        throw new Error("Email já cadastrado");
+        throw new AppError("Email já cadastrado", 409);
       }
     }
 
@@ -56,7 +52,7 @@ class StoreService {
     );
 
     if (!storeUpdate) {
-      throw new Error("Loja não encontrada");
+      throw new AppError("Loja não encontrada", 404);
     }
 
     return storeUpdate;
@@ -64,25 +60,25 @@ class StoreService {
 
   async updatePassword(id: string, data: UpdatePasswordDTO): Promise<void>{
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new Error("Formato de ID inválido");
+      throw new AppError("Formato de ID inválido", 400);
     }
 
     const store = await Store.findById(id).select("+password");
 
     if(!store){
-      throw new Error("Loja não encontrada");
+      throw new AppError("Loja não encontrada", 404);
     }
     
     const confirmPassword = await bcrypt.compare(data.currentPassword, store.password);
 
     if(!confirmPassword){
-      throw new Error("Senha Atual invalida");
+      throw new AppError("Senha Atual invalida", 401);
     }
 
     const samePassword = await bcrypt.compare(data.newPassword, store.password);
 
     if (samePassword) {
-      throw new Error("A nova senha não pode ser igual à senha atual");
+      throw new AppError("A nova senha não pode ser igual à senha atual", 401);
     }
 
     store.password = await bcrypt.hash(data.newPassword, 10);
