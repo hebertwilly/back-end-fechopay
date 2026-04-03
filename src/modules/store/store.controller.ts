@@ -1,9 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { storeService } from "./store.service";
 import { createStoreSchema, updateStoreSchema, updatePasswordSchema } from "./store.schema";
-interface Params {
-  id: string;
-}
+import { requireUser } from "../../utils/require-user";
 class StoreController {
 
   async create(req: Request, res: Response, next: NextFunction) {
@@ -15,7 +13,7 @@ class StoreController {
       const storeObject = store.toObject();
       delete storeObject.password;
 
-      return res.status(201).json({
+      res.status(201).json({
         success: true,
         data: storeObject,
       });
@@ -24,15 +22,17 @@ class StoreController {
     }
   }
 
-  async update(req: Request<Params>, res: Response, next: NextFunction){
+  async update(req: Request, res: Response, next: NextFunction){
     try {
+
+      const user = requireUser(req);
+
+
       const validatedData = updateStoreSchema.parse(req.body);
 
-      const { id } = req.params;
+      const store = await storeService.updateStore(user.id, validatedData);
 
-      const store = await storeService.updateStore(id, validatedData);
-
-      return res.status(200).json({
+      res.status(200).json({
         success: true,
         data: store,
       });
@@ -41,15 +41,16 @@ class StoreController {
     }
   }
 
-  async updatePassword (req: Request<Params>, res: Response, next: NextFunction){
+  async updatePassword (req: Request, res: Response, next: NextFunction){
     try{
+      
+      const user = requireUser(req);
+      
       const validatedData = updatePasswordSchema.parse(req.body);
 
-      const {id} = req.params;
+      await storeService.updatePassword(user.id, validatedData);
 
-      await storeService.updatePassword(id, validatedData);
-
-      return res.status(200).json({
+      res.status(200).json({
         success: true,
         message: "Senha atualizada com sucesso"
       });
